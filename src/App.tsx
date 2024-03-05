@@ -1,14 +1,20 @@
+import { useSelector } from 'react-redux';
+
 import Cart from './components/Cart/Cart';
 import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
+import { AppRootState } from './store/store';
 
-function App() {
+const App = (): JSX.Element => {
+  const isCartVisible = useSelector<AppRootState, boolean>(
+    (state) => state.cart.isCartVisible
+  );
   return (
     <Layout>
-      <Cart />
+      {isCartVisible && <Cart />}
       <Products />
     </Layout>
   );
-}
+};
 
 export default App;
