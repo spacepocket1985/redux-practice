@@ -1,12 +1,18 @@
+import { useDispatch } from 'react-redux';
 import { CartItemType } from '../../types/types';
 import styles from './CartItem.module.css';
+import { cartActions } from '../../store/slices/cartSlice';
 
 type CartItemPropsType = {
   item: CartItemType;
 };
 
 const CartItem = (props: CartItemPropsType): JSX.Element => {
-  const { title, quantity, total, price } = props.item;
+  const { title, quantity, total, price} = props.item;
+
+  const dispatch = useDispatch();
+  const onDecreaseItemHandler = (item:CartItemType)=>dispatch(cartActions.decreaseItemInCart(item))
+  const onIncreaseItemHandler = (item:CartItemType)=>dispatch(cartActions.increaseItemInCart(item))
 
   return (
     <li className={styles.item}>
@@ -24,8 +30,8 @@ const CartItem = (props: CartItemPropsType): JSX.Element => {
           x <span>{quantity}</span>
         </div>
         <div className={styles.actions}>
-          <button>-</button>
-          <button>+</button>
+          <button onClick={()=>{onDecreaseItemHandler(props.item)}}>-</button>
+          <button onClick={()=>{onIncreaseItemHandler(props.item)}}>+</button>
         </div>
       </div>
     </li>
