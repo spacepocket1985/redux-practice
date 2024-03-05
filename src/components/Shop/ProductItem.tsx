@@ -1,15 +1,13 @@
-import Card from "../UI/Card";
-import styles from "./ProductItem.module.css";
+import { ProductType } from '../../types/types';
+import Card from '../UI/Card';
+import styles from './ProductItem.module.css';
 
 type ProductItemPropsType = {
-  title: string;
-  price: number;
-  description: string;
+  item: ProductType;
 };
 
-
-const ProductItem = (props:ProductItemPropsType) => {
-  const { title, price, description } = props;
+const ProductItem = (props: ProductItemPropsType) => {
+  const { title, price, description } = props.item;
 
   return (
     <li className={styles.item}>
