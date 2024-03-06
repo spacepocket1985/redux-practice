@@ -6,7 +6,7 @@ export type StatusBarMessagePropsType = {
   message: string | null;
 };
 
-const StatusBarMessage = (props: StatusBarMessagePropsType) => {
+const StatusBarMessage = (props: StatusBarMessagePropsType): JSX.Element => {
   let statusClasses = '';
 
   if (props.status === 'error') {
