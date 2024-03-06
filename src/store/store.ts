@@ -4,8 +4,9 @@ import { combineReducers } from 'redux';
 
 import productReducer from './slices/productsSlice';
 import cartReducer from './slices/cartSlice'
+import mainReducer from './slices/mainSlice'
 
-const rootReducer = combineReducers({ products: productReducer, cart:cartReducer });
+const rootReducer = combineReducers({ products: productReducer, cart:cartReducer, main:mainReducer });
 
 export const store = configureStore({ reducer: rootReducer });
 export type AppRootState = ReturnType<typeof rootReducer>;

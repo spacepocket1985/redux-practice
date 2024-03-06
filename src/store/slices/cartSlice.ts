@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CartItemType, ProductType } from '../../types/types';
 import { findCartItemIndex } from '../../utils/findCartItemIndex';
 
-type CartStateType = {
+export type CartStateType = {
   isCartVisible: boolean;
   cartItems: Array<CartItemType>;
 };
