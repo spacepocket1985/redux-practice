@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
 import { CartItemType, ProductType } from '../../types/types';
 import { findCartItemIndex } from '../../utils/findCartItemIndex';
+import { mainActions } from './mainSlice';
 
 export type CartStateType = {
   isCartVisible: boolean;
@@ -65,6 +66,50 @@ const cartSlice = createSlice({
     },
   },
 });
+
+export const sendCartData = (cardData: Array<CartItemType>) => {
+  return async (dispatch: Dispatch): Promise<void> => {
+    dispatch(
+      mainActions.showStatusMessage({
+        status: 'pending',
+        title: 'Отправка данных',
+        message: 'Данные корзины отправляются',
+      })
+    );
+
+    const sendHttpRequest = async () => {
+      const response = await fetch(
+        'https://foodorder-35bc5-default-rtdb.firebaseio.com/cart.json',
+        {
+          method: 'PUT',
+          body: JSON.stringify(cardData),
+        }
+      );
+      if (!response.ok) throw new Error('Ошибка про отправке данных корзины');
+    };
+
+    try {
+      await sendHttpRequest();
+      dispatch(
+        mainActions.showStatusMessage({
+          status: 'success',
+          title: 'Данные отправлены успешно',
+          message: 'Данные корзины успешно отправлены!',
+        })
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        dispatch(
+          mainActions.showStatusMessage({
+            status: 'error',
+            title: 'Ошибка отправки данных',
+            message: error.message,
+          })
+        );
+      }
+    }
+  };
+};
 
 export const cartActions = cartSlice.actions;
 export default cartSlice.reducer;
