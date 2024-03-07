@@ -7,16 +7,14 @@ import CartItem from "./CartItem";
 
 const Cart = ():JSX.Element  => {
   const cartItems = useSelector<AppRootState, CartItemType[]>((state)=>state.cart.cartItems);
-  const cartItemsList = cartItems.map((item) => (
+  const cartItemsList = cartItems? cartItems.map((item) => (
     <CartItem item={item}  key={item.id}/>
-  ));
+  )): 'Ваша корзина пуста.';
   return (
     <Card className={styles.cart}>
       <h2>Мои Покупки</h2>
       <ul>
-      {cartItemsList.length > 0
-          ? cartItemsList
-          : 'Ваша корзина пуста.'}
+      {cartItemsList}
       </ul>
     </Card>
   );

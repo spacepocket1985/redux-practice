@@ -15,11 +15,11 @@ const CartButton = (): JSX.Element => {
   const toggleCartHandler = (): void => {
     dispatch(cartActions.showHideCart());
   };
-  const amountItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const amountItems = cartItems?.reduce((acc, item) => acc + item.quantity, 0);
   return (
     <button className={styles.button} onClick={toggleCartHandler}>
       <span>Корзина</span>
-      <span className={styles.badge}>{amountItems}</span>
+      <span className={styles.badge}>{amountItems | 0}</span>
     </button>
   );
 };

@@ -6,10 +6,12 @@ import { mainActions } from './mainSlice';
 export type CartStateType = {
   isCartVisible: boolean;
   cartItems: Array<CartItemType>;
+  isCartContentChanged: boolean;
 };
 
 const initialState: CartStateType = {
   isCartVisible: false,
+  isCartContentChanged: false,
   cartItems: [],
 };
 
@@ -21,26 +23,26 @@ const cartSlice = createSlice({
       state.isCartVisible = !state.isCartVisible;
     },
     addItemToCart: (state, action: PayloadAction<ProductType>) => {
-      const itemIndex = findCartItemIndex(state.cartItems, action.payload.id);
+      state.isCartContentChanged = true;
+      const existingItem = state.cartItems.find(
+        (item) => item.id === action.payload.id
+      );
 
-      itemIndex === -1
-        ? (state.cartItems = [
-            {
-              id: action.payload.id,
-              title: action.payload.title,
-              quantity: 1,
-              price: action.payload.price,
-              total: action.payload.price,
-            },
-            ...state.cartItems,
-          ])
-        : (state.cartItems[itemIndex] = {
-            ...state.cartItems[itemIndex],
-            quantity: state.cartItems[itemIndex].quantity++,
-            total: state.cartItems[itemIndex].total + action.payload.price,
-          });
+      if (!existingItem)
+        state.cartItems.push({
+          id: action.payload.id,
+          title: action.payload.title,
+          quantity: 1,
+          price: action.payload.price,
+          total: action.payload.price,
+        });
+      else {
+        existingItem.quantity++;
+        existingItem.total = existingItem.price * existingItem.quantity;
+      }
     },
     decreaseItemInCart: (state, action: PayloadAction<CartItemType>) => {
+      state.isCartContentChanged = true;
       const itemIndex = findCartItemIndex(state.cartItems, action.payload.id);
       if (itemIndex === -1) return state;
       const itemsAfterUpdate =
@@ -51,18 +53,23 @@ const cartSlice = createSlice({
                 ? item
                 : {
                     ...item,
-                    quantity: item.quantity--,
+                    quantity: --item.quantity,
                     total: item.total - action.payload.price,
                   }
             );
       state.cartItems = itemsAfterUpdate;
     },
     increaseItemInCart: (state, action: PayloadAction<CartItemType>) => {
+      state.isCartContentChanged = true;
       const itemIndex = findCartItemIndex(state.cartItems, action.payload.id);
       if (itemIndex === -1) return state;
       state.cartItems[itemIndex].quantity++;
       state.cartItems[itemIndex].total =
         state.cartItems[itemIndex].total + action.payload.price;
+    },
+    updateCart: (state, action: PayloadAction<CartItemType[]>) => {
+      state.cartItems = action.payload;
+      state.isCartContentChanged = false;
     },
   },
 });
@@ -77,7 +84,7 @@ export const sendCartData = (cardData: Array<CartItemType>) => {
       })
     );
 
-    const sendHttpRequest = async () => {
+    const sendDataHttpRequest = async () => {
       const response = await fetch(
         'https://foodorder-35bc5-default-rtdb.firebaseio.com/cart.json',
         {
@@ -89,7 +96,7 @@ export const sendCartData = (cardData: Array<CartItemType>) => {
     };
 
     try {
-      await sendHttpRequest();
+      await sendDataHttpRequest();
       dispatch(
         mainActions.showStatusMessage({
           status: 'success',
@@ -103,6 +110,38 @@ export const sendCartData = (cardData: Array<CartItemType>) => {
           mainActions.showStatusMessage({
             status: 'error',
             title: 'Ошибка отправки данных',
+            message: error.message,
+          })
+        );
+      }
+    }
+  };
+};
+
+export const getCartData = () => {
+  return async (dispatch: Dispatch) => {
+    const getDataHttpRequest = async () => {
+      const response = await fetch(
+        'https://foodorder-35bc5-default-rtdb.firebaseio.com/cart.json'
+      );
+      if (!response.ok) throw new Error('Ошибка про получении  данных корзины');
+
+      const responseData: CartItemType[] = await response.json();
+      console.log('responseData   ==>', responseData);
+      if (!responseData) return [];
+
+      return responseData;
+    };
+
+    try {
+      const cartData = await getDataHttpRequest();
+      dispatch(cartActions.updateCart(cartData));
+    } catch (error) {
+      if (error instanceof Error) {
+        dispatch(
+          mainActions.showStatusMessage({
+            status: 'error',
+            title: 'Ошибка при получении данных корзины',
             message: error.message,
           })
         );

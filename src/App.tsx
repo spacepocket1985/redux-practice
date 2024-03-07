@@ -4,31 +4,45 @@ import { useEffect } from 'react';
 import Cart from './components/Cart/Cart';
 import Layout from './components/Layout/Layout';
 import Products from './components/Shop/Products';
-import { CartStateType, sendCartData } from './store/slices/cartSlice';
+import {
+  CartStateType,
+  getCartData,
+  sendCartData,
+} from './store/slices/cartSlice';
 import { AppRootState } from './store/store';
 import StatusBarMessage, {
   StatusBarMessagePropsType,
 } from './components/UI/StatusBarMessage';
-import { useAppDispatch } from './hooks/hooks';
+import { useAppDispatch, useAppSelector } from './hooks/hooks';
 
 let isInitialRunning = true;
 
 const App = (): JSX.Element => {
-  const isCartVisible = useSelector<AppRootState, boolean>(
-    (state) => state.cart.isCartVisible
-  );
+  // with default useSelector
+
+  // const isCartVisible = useSelector<AppRootState, boolean>(
+  //   (state) => state.cart.isCartVisible
+  // );
+
+  // with custom useSelector
+  const isCartVisible = useAppSelector((state) => state.cart.isCartVisible);
+
   const cart = useSelector<AppRootState, CartStateType>((state) => state.cart);
   const statusMessage = useSelector<AppRootState, StatusBarMessagePropsType>(
     (state) => state.main.statusMessage
   );
 
-   const dispatch = useAppDispatch(); 
-   useEffect(() => {
-    if (!isInitialRunning) {
-      dispatch(sendCartData(cart.cartItems)); // Pass dispatch function to sendCartData
-    } else {
+  const dispatch = useAppDispatch();
+
+  useEffect(()=>{dispatch(getCartData())},[])
+
+  useEffect(() => {
+    if (isInitialRunning) {
       isInitialRunning = false;
+      return;
     }
+    if (cart.isCartContentChanged) dispatch(sendCartData(cart.cartItems));
+    
   }, [cart, dispatch]);
 
   return (

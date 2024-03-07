@@ -8,8 +8,15 @@ import mainReducer from './slices/mainSlice'
 
 const rootReducer = combineReducers({ products: productReducer, cart:cartReducer, main:mainReducer });
 
-export type AppDispatch = typeof store.dispatch
+
 
 export const store = configureStore({ reducer: rootReducer });
+
 export type AppRootState = ReturnType<typeof rootReducer>;
+
+// Infer the `RootState` and `AppDispatch` types from the store itself
+// https://redux-toolkit.js.org/tutorials/typescript
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch
+
 
