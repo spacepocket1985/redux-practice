@@ -1,4 +1,9 @@
-import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSlice,
+  Dispatch,
+  PayloadAction,
+} from '@reduxjs/toolkit';
 import { CartItemType, ProductType } from '../../types/types';
 import { findCartItemIndex } from '../../utils/findCartItemIndex';
 import { mainActions } from './mainSlice';
@@ -67,10 +72,19 @@ const cartSlice = createSlice({
       state.cartItems[itemIndex].total =
         state.cartItems[itemIndex].total + action.payload.price;
     },
+    //// without createAsyncThunk
     updateCart: (state, action: PayloadAction<CartItemType[]>) => {
       state.cartItems = action.payload;
       state.isCartContentChanged = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getDataFromCart.fulfilled, (state, action) => {
+      if (action.payload) {
+        state.cartItems = action.payload;
+        state.isCartContentChanged = false;
+      }
+    });
   },
 });
 
@@ -117,7 +131,7 @@ export const sendCartData = (cardData: Array<CartItemType>) => {
     }
   };
 };
-
+// without createAsyncThunk
 export const getCartData = () => {
   return async (dispatch: Dispatch) => {
     const getDataHttpRequest = async () => {
@@ -149,6 +163,33 @@ export const getCartData = () => {
     }
   };
 };
+
+export const getDataFromCart = createAsyncThunk(
+  'cart/getDataFromCart',
+  async (_, thunkApi) => {
+    try {
+      const response = await fetch(
+        'https://foodorder-35bc5-default-rtdb.firebaseio.com/cart.json'
+      );
+      if (!response.ok) throw new Error('Ошибка про получении  данных корзины');
+
+      const responseData: CartItemType[] = await response.json();
+      if (!responseData) return [];
+
+      return responseData;
+    } catch (error) {
+      if (error instanceof Error) {
+        thunkApi.dispatch(
+          mainActions.showStatusMessage({
+            status: 'error',
+            title: 'Ошибка при получении данных корзины',
+            message: error.message,
+          })
+        );
+      }
+    }
+  }
+);
 
 export const cartActions = cartSlice.actions;
 export default cartSlice.reducer;

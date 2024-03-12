@@ -7,6 +7,7 @@ import Products from './components/Shop/Products';
 import {
   CartStateType,
   getCartData,
+  getDataFromCart,
   sendCartData,
 } from './store/slices/cartSlice';
 import { AppRootState } from './store/store';
@@ -34,7 +35,7 @@ const App = (): JSX.Element => {
 
   const dispatch = useAppDispatch();
 
-  useEffect(()=>{dispatch(getCartData())},[])
+  useEffect(()=>{dispatch(getDataFromCart())},[])
 
   useEffect(() => {
     if (isInitialRunning) {
